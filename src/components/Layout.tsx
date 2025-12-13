@@ -25,7 +25,7 @@ const Layout = ({ children, title, userType }: LayoutProps) => {
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">SAE</h1>
+              <h1 className="text-xl font-bold text-foreground">SAGE</h1>
               <p className="text-xs text-muted-foreground">{userType}</p>
             </div>
           </div>
