@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, GraduationCap, UserCog, FileText } from "lucide-react";
 
-const Login = () => {
+const Role = () => {
   const navigate = useNavigate();
   const [selectedProfile, setSelectedProfile] = useState<string>("");
 
@@ -41,10 +41,9 @@ const Login = () => {
 
   const handleLogin = () => {
     if (selectedProfile) {
-      const profile = profiles.find((p) => p.id === selectedProfile);
-      if (profile) {
-        navigate(profile.path);
-      }
+      navigate("/auth/login", {
+        state: { role: selectedProfile },
+      });
     }
   };
 
@@ -113,4 +112,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Role;

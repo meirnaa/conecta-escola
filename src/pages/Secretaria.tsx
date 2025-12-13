@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,22 +11,138 @@ const Secretaria = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const alunos = [
-    { id: 1, nome: "Ana Silva", matricula: "2023001", turma: "3º Ano A", status: "Ativo" },
-    { id: 2, nome: "Carlos Santos", matricula: "2023002", turma: "3º Ano A", status: "Ativo" },
-    { id: 3, nome: "Maria Oliveira", matricula: "2023003", turma: "2º Ano B", status: "Ativo" },
-  ];
+  // Estados para armazenar usuários
+  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [alunos, setAlunos] = useState<any[]>([]);
+  const [professores, setProfessores] = useState<any[]>([]);
 
-  const professores = [
-    { id: 1, nome: "Prof. João Silva", cpf: "123.456.789-00", disciplina: "Matemática" },
-    { id: 2, nome: "Profa. Maria Santos", cpf: "987.654.321-00", disciplina: "Português" },
-  ];
+  // useEffect para buscar usuários do backend
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        const res = await fetch("http://localhost:3333/users");
+        const data = await res.json();
 
-  const handleCadastrar = (tipo: string) => {
+        setUsuarios(data);
+        setAlunos(data.filter((u: any) => u.role === "aluno"));
+        setProfessores(data.filter((u: any) => u.role === "professor"));
+      } catch (err) {
+        console.error("Erro ao buscar usuários:", err);
+      }
+    };
+    
+      fetchUsuarios();
+    }, []);
+
+const [alunoNome, setAlunoNome] = useState("");
+const [alunoNascimento, setAlunoNascimento] = useState("");
+const [alunoCPF, setAlunoCPF] = useState("");
+const [alunoResponsavel, setAlunoResponsavel] = useState("");
+const [alunoTelefone, setAlunoTelefone] = useState("");
+const [alunoTurma, setAlunoTurma] = useState("");
+const [alunoEmail, setAlunoEmail] = useState("");
+const [alunoSenha, setAlunoSenha] = useState("");
+const [error, setError] = useState<string | null>(null);
+
+const handleCadastrarAluno = async () => {
+  try {
+    const res = await fetch("http://localhost:3333/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: alunoNome,
+        email: alunoEmail,
+        password: alunoSenha,
+        role: "aluno",
+        nascimento: alunoNascimento,
+        cpf: alunoCPF,
+        responsavel: alunoResponsavel,
+        telefone: alunoTelefone,
+        turma: alunoTurma,
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error || "Erro ao cadastrar aluno");
+      return;
+    }
+
     toast({
       title: "Cadastro Realizado",
-      description: `${tipo} cadastrado(a) com sucesso no sistema.`,
+      description: `Aluno ${alunoNome} cadastrado com sucesso.`,
     });
+
+    // Limpar campos
+    setAlunoNome("");
+    setAlunoNascimento("");
+    setAlunoCPF("");
+    setAlunoResponsavel("");
+    setAlunoTelefone("");
+    setAlunoTurma("");
+    setAlunoEmail("");
+    setAlunoSenha("");
+    setError(null);
+  } catch (err) {
+    setError("Erro ao conectar com o servidor");
+  }
+};
+
+// States do formulário
+const [profNome, setProfNome] = useState("");
+const [profNascimento, setProfNascimento] = useState("");
+const [profCPF, setProfCPF] = useState("");
+const [profFormacao, setProfFormacao] = useState("");
+const [profDisciplina, setProfDisciplina] = useState("");
+const [profCarga, setProfCarga] = useState("20 horas");
+const [profEmail, setProfEmail] = useState("");
+const [profSenha, setProfSenha] = useState("");
+
+
+  const handleCadastrarProfessor = async () => {
+    try {
+      const res = await fetch("http://localhost:3333/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profNome,
+          cpf: profCPF,
+          dataNascimento: profNascimento,
+          formacao: profFormacao,
+          disciplina: profDisciplina,
+          cargaHoraria: profCarga,
+          email: profEmail,
+          password: profSenha,
+          role: "professor",
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast({ title: "Erro ao cadastrar", description: err.error || "Erro desconhecido" });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Professor cadastrado com sucesso!",
+      });
+
+      // Limpar formulário
+      setProfNome("");
+      setProfNascimento("");
+      setProfCPF("");
+      setProfFormacao("");
+      setProfDisciplina("");
+      setProfCarga("20 horas");
+      setProfEmail("");
+      setProfSenha("");
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha na comunicação com o servidor",
+      });
+    }
   };
 
   const handleEditar = (tipo: string, nome: string) => {
@@ -39,31 +155,31 @@ const Secretaria = () => {
   return (
     <Layout title="Painel da Secretaria" userType="Secretaria">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Alunos Cadastrados</CardTitle>
-              <Users className="w-5 h-5 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-primary">450</div>
-            <p className="text-sm text-muted-foreground mt-1">Total de estudantes</p>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Alunos Cadastrados</CardTitle>
+            <Users className="w-5 h-5 text-primary" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-4xl font-bold text-primary">{alunos.length}</div>
+          <p className="text-sm text-muted-foreground mt-1">Total de estudantes</p>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Professores Cadastrados</CardTitle>
-              <Users className="w-5 h-5 text-accent" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-accent">25</div>
-            <p className="text-sm text-muted-foreground mt-1">Corpo docente</p>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Professores Cadastrados</CardTitle>
+            <Users className="w-5 h-5 text-accent" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-4xl font-bold text-accent">{professores.length}</div>
+          <p className="text-sm text-muted-foreground mt-1">Corpo docente</p>
+        </CardContent>
+      </Card>
       </div>
 
       <Tabs defaultValue="cadastrar" className="space-y-6">
@@ -85,36 +201,56 @@ const Secretaria = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nome Completo</label>
-                  <Input placeholder="Digite o nome do aluno" />
+                  <Input value={alunoNome} onChange={(e) => setAlunoNome(e.target.value)} placeholder="Digite o nome do aluno" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Data de Nascimento</label>
-                    <Input type="date" />
+                    <Input value={alunoNascimento} onChange={(e) => setAlunoNascimento(e.target.value)}  type="date" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">CPF</label>
-                    <Input placeholder="000.000.000-00" />
+                    <Input value={alunoCPF} onChange={(e) => setAlunoCPF(e.target.value)}  placeholder="000.000.000-00" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Responsável</label>
-                  <Input placeholder="Nome do responsável" />
+                  <Input value={alunoResponsavel} onChange={(e) => setAlunoResponsavel(e.target.value)}  placeholder="Nome do responsável" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Telefone</label>
-                  <Input placeholder="(00) 00000-0000" />
+                  <Input value={alunoTelefone} onChange={(e) => setAlunoTelefone(e.target.value)}  placeholder="(00) 00000-0000" />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-medium">Email</label>
+                  <Input
+                    type="email"
+                    placeholder="Digite o email do aluno"
+                    value={alunoEmail}
+                    onChange={(e) => setAlunoEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Senha</label>
+                  <Input
+                    type="password"
+                    placeholder="Digite a senha do aluno"
+                    value={alunoSenha}
+                    onChange={(e) => setAlunoSenha(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-medium">Turma</label>
-                  <select className="w-full h-10 px-3 rounded-lg border border-input bg-background">
+                  <select value={alunoTurma} onChange={(e) => setAlunoTurma(e.target.value)} className="w-full h-10 px-3 rounded-lg border border-input bg-background">
                     <option>Selecione uma turma</option>
                     <option>1º Ano A</option>
                     <option>2º Ano A</option>
                     <option>3º Ano A</option>
                   </select>
                 </div>
-                <Button onClick={() => handleCadastrar("Aluno")} className="w-full">
+                <Button onClick={() => handleCadastrarAluno("Aluno")} className="w-full">
                   Cadastrar Aluno
                 </Button>
               </CardContent>
@@ -131,25 +267,25 @@ const Secretaria = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nome Completo</label>
-                  <Input placeholder="Digite o nome do professor" />
+                  <Input value={profNome} onChange={(e) => setProfNome(e.target.value)} placeholder="Digite o nome do professor" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Data de Nascimento</label>
-                    <Input type="date" />
+                    <Input value={profNascimento} onChange={(e) => setProfNascimento(e.target.value)} type="date" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">CPF</label>
-                    <Input placeholder="000.000.000-00" />
+                    <Input value={profCPF} onChange={(e) => setProfCPF(e.target.value)} placeholder="000.000.000-00" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Formação</label>
-                  <Input placeholder="Ex: Licenciatura em Matemática" />
+                  <Input value={profFormacao} onChange={(e) => setProfFormacao(e.target.value)} placeholder="Ex: Licenciatura em Matemática" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Disciplina</label>
-                  <select className="w-full h-10 px-3 rounded-lg border border-input bg-background">
+                  <select className="w-full h-10 px-3 rounded-lg border border-input bg-background" value={profDisciplina} onChange={(e) => setProfDisciplina(e.target.value)}>
                     <option>Selecione uma disciplina</option>
                     <option>Matemática</option>
                     <option>Português</option>
@@ -160,12 +296,31 @@ const Secretaria = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Carga Horária</label>
-                  <select className="w-full h-10 px-3 rounded-lg border border-input bg-background">
+                  <select className="w-full h-10 px-3 rounded-lg border border-input bg-background" value={profCarga} onChange={(e) => setProfCarga(e.target.value)}>
                     <option>20 horas</option>
                     <option>40 horas</option>
                   </select>
                 </div>
-                <Button onClick={() => handleCadastrar("Professor")} className="w-full">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email</label>
+                  <Input
+                    value={profEmail} onChange={(e) => setProfEmail(e.target.value)} type="email"
+                    placeholder="Digite o email do professor"
+                    value={profEmail}
+                    onChange={(e) => setProfEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Senha</label>
+                  <Input
+                    type="password"
+                    placeholder="Digite a senha do professor"
+                    value={profSenha}
+                    onChange={(e) => setProfSenha(e.target.value)}
+                  />
+                </div>
+                <Button onClick={() => handleCadastrarProfessor("Professor")} className="w-full">
                   Cadastrar Professor
                 </Button>
               </CardContent>
@@ -210,7 +365,7 @@ const Secretaria = () => {
                       {alunos.map((aluno) => (
                         <tr key={aluno.id} className="border-b border-border hover:bg-muted/50">
                           <td className="py-3 px-4">{aluno.matricula}</td>
-                          <td className="py-3 px-4 font-medium">{aluno.nome}</td>
+                          <td className="py-3 px-4 font-medium">{aluno.name}</td>
                           <td className="py-3 px-4">{aluno.turma}</td>
                           <td className="text-center py-3 px-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

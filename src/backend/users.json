@@ -1,0 +1,21 @@
+[
+  {
+    "id": 1765582477702,
+    "name": "maria",
+    "email": "maria@gmail.com",
+    "password": "12312312",
+    "role": "secretaria"
+  },
+  {
+    "id": 1765585723136,
+    "name": "junior",
+    "email": "junior@gmail.com",
+    "password": "12345654",
+    "role": "aluno",
+    "nascimento": "2011-07-14",
+    "cpf": "45612345612",
+    "responsavel": "josé junior",
+    "telefone": "78451207777",
+    "turma": "1º Ano A"
+  }
+]
