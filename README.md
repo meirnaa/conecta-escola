@@ -107,6 +107,11 @@ cd conecta-escola/
 - Executar o projeto:
 node server.js
 
+- Para testes, utilizar esse perfil
+    "email": "maria@gmail.com",
+    "password": "12312312",
+    "role": "secretaria"
+
 O sistema implementa **autenticação e autorização por perfil**, garantindo que cada usuário tenha acesso apenas às funcionalidades correspondentes ao seu papel dentro da instituição.
 
 A aplicação estará disponível em:
