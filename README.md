@@ -1,73 +1,130 @@
-# Welcome to your Lovable project
+# Sistema de Gestão Escolar
 
-## Project info
+## 1. Introdução
 
-**URL**: https://lovable.dev/projects/874dfc26-492f-4202-ac83-68776c3a8acf
+Este trabalho apresenta o desenvolvimento de um **Sistema de Gestão Escolar**, criado com o framework **Next.js**, com o objetivo de informatizar e otimizar os processos acadêmicos e administrativos de uma instituição de ensino.
 
-## How can I edit this code?
+O sistema foi projetado para atender diferentes perfis de usuários — **Professor, Aluno, Secretaria e Diretor** — cada um com permissões específicas, garantindo organização, segurança e eficiência no gerenciamento das informações escolares.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 2. Objetivos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/874dfc26-492f-4202-ac83-68776c3a8acf) and start prompting.
+### 2.1 Objetivo Geral
 
-Changes made via Lovable will be committed automatically to this repo.
+Desenvolver um sistema web capaz de gerenciar atividades acadêmicas e administrativas de uma escola, promovendo maior controle, transparência e acessibilidade às informações.
 
-**Use your preferred IDE**
+### 2.2 Objetivos Específicos
+* Facilitar o lançamento e acompanhamento de **notas e frequência**;
+* Permitir o gerenciamento de **matrículas, turmas e disciplinas**;
+* Disponibilizar aos alunos o acesso ao **boletim e atividades**;
+* Gerar **relatórios gerenciais** para a direção;
+* Aplicar controle de acesso conforme o perfil do usuário.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
+## 3. Tecnologias Utilizadas
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- NodeJS e Express
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/874dfc26-492f-4202-ac83-68776c3a8acf) and click on Share -> Publish.
+## 4. Perfis de Usuários e Funcionalidades
 
-## Can I connect a custom domain to my Lovable project?
+### 4.1 Professor
 
-Yes, you can!
+ perfil de professor é responsável pelo acompanhamento pedagógico das turmas.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Funcionalidades:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+* Lançamento e edição de **notas**;
+* Registro de **aulas ministradas**;
+* Controle de **frequência**;
+* Publicação de **avisos**;
+* Criação e gerenciamento de **tarefas e atividades**.
+
+---
+
+### 4.2 Aluno
+
+O aluno possui acesso às informações acadêmicas individuais.
+
+Funcionalidades:
+
+* Visualização do **boletim escolar**;
+* Acompanhamento da **frequência**;
+* Visualização de **avisos e atividades**;
+
+---
+
+### 4.3 Secretaria
+
+A secretaria é responsável pela gestão administrativa e acadêmica.
+
+Funcionalidades:
+
+* **Matrícula de alunos**;
+* Cadastro de **professores**;
+* **Alocação de professores** às disciplinas e turmas.
+
+---
+
+### 4.4 Diretor
+
+O diretor possui acesso amplo ao sistema, com foco em gestão e tomada de decisão.
+
+Funcionalidades:
+
+* Visualização de **relatórios acadêmicos e administrativos**;
+* Acompanhamento geral do desempenho institucional.
+---
+
+## 5. Execução do Projeto
+
+### 5.1 Requisitos
+
+* Node.js instalado
+* Gerenciador de pacotes (npm ou yarn)
+
+### 5.2 Passos para Execução
+
+bash
+# Clonar o repositório
+git clone https://github.com/meirnaa/conecta-escola.git
+
+# Acessar a pasta do projeto
+cd conecta-escola
+# Executar o projeto
+npm run dev
+
+# Acessar a pasta do backend do projeto
+cd conecta-escola/
+# Executar o projeto
+npm run dev
+
+O sistema implementa **autenticação e autorização por perfil**, garantindo que cada usuário tenha acesso apenas às funcionalidades correspondentes ao seu papel dentro da instituição.
+
+A aplicação estará disponível em:
+http://localhost:3000
+
+
+---
+
+## 6. Considerações Finais
+
+O Sistema de Gestão Escolar desenvolvido atende aos objetivos propostos, oferecendo uma solução funcional e organizada para o controle acadêmico e administrativo. A utilização do **Next.js** proporciona desempenho, escalabilidade e facilidade de manutenção, tornando o sistema adequado para futuras evoluções.
+
+---
+
+## 7. Componentes
+- Lina Gabrielly
+- Teresa
+- Meir Naã
+- Luana
+
+
+
