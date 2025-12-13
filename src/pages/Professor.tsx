@@ -192,9 +192,13 @@ const Professor = () => {
   };
   
 
-  function toggleFrequencia(id: number): void {
-    throw new Error("Function not implemented.");
-  }
+  const toggleFrequencia = (id: number) => {
+    setFrequencia(prev =>
+      prev.includes(id)
+        ? prev.filter(alunoId => alunoId !== id) // remove
+        : [...prev, id] // adiciona
+    );
+  };  
 
   return (
     <Layout title="Painel do Professor" userType="Professor">

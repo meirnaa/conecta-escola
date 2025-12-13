@@ -1,48 +1,121 @@
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, GraduationCap, TrendingUp, AlertCircle } from "lucide-react";
 
+interface Usuario {
+  id: string;
+  name: string;
+  role: "aluno" | "professor" | "secretaria";
+  disciplina?: string;
+  cargaHoraria?: string;
+  turmas?: number;
+  turma?: string;
+  notas?: Record<string, number[]>; // notas por disciplina
+  media?: number; // média geral do aluno
+}
+
+const disciplinas = ["Matemática", "Português", "História", "Geografia", "Ciências", "Física"];
+
 const Diretor = () => {
-  const professores = [
-    { id: 1, nome: "Prof. João Silva", disciplina: "Matemática", turmas: 3, cargaHoraria: "40h" },
-    { id: 2, nome: "Profa. Maria Santos", disciplina: "Português", turmas: 4, cargaHoraria: "40h" },
-    { id: 3, nome: "Prof. Carlos Oliveira", disciplina: "Física", turmas: 2, cargaHoraria: "20h" },
-    { id: 4, nome: "Profa. Ana Costa", disciplina: "Química", turmas: 2, cargaHoraria: "20h" },
-  ];
+  const [alunos, setAlunos] = useState<Usuario[]>([]);
+  const [professores, setProfessores] = useState<Usuario[]>([]);
+  const [turmaFiltro, setTurmaFiltro] = useState<string>("");
+  const [disciplinaFiltro, setDisciplinaFiltro] = useState<string>("");
 
-  const alunosDesempenho = [
-    { nome: "Ana Silva", turma: "3º Ano A", media: 9.2, faltas: 2, status: "Excelente" },
-    { nome: "Carlos Santos", turma: "3º Ano A", media: 7.8, faltas: 5, status: "Bom" },
-    { nome: "Maria Oliveira", turma: "2º Ano B", media: 6.5, faltas: 8, status: "Regular" },
-    { nome: "João Costa", turma: "2º Ano A", media: 5.2, faltas: 12, status: "Atenção" },
-  ];
+  useEffect(() => {
+    const fetchDados = async () => {
+      const res = await fetch("http://localhost:3333/users");
+      const data: Usuario[] = await res.json();
+      setAlunos(data.filter(u => u.role === "aluno"));
+      setProfessores(data.filter(u => u.role === "professor"));
+    };
+    fetchDados();
+  }, []);
 
-  const estatisticas = {
-    totalAlunos: 450,
-    totalProfessores: 25,
-    mediaGeral: 7.8,
-    taxaAprovacao: 92,
+  // Média geral do aluno (todas as disciplinas)
+  const calcularMediaGeralAluno = (aluno: Usuario) => {
+    const todasNotas = Object.values(aluno.notas ?? {})
+      .flat()
+      .filter(n => typeof n === "number");
+    if (todasNotas.length === 0) return null;
+    return todasNotas.reduce((acc, n) => acc + n, 0) / todasNotas.length;
+  };
+
+  // Adiciona média geral do aluno
+  const alunosComMedia = alunos.map(a => ({
+    ...a,
+    media: calcularMediaGeralAluno(a),
+  }));
+
+  // Média geral da escola
+  const mediaGeralEscola = alunosComMedia.length > 0
+    ? (
+        alunosComMedia.reduce((acc, a) => acc + (a.media ?? 0), 0) /
+        alunosComMedia.length
+      ).toFixed(1)
+    : "-";
+
+  // Taxa de aprovação (baseada na média geral)
+  const aprovados = alunosComMedia.filter(a => (a.media ?? 0) >= 7).length;
+  const taxaAprovacao = alunosComMedia.length > 0
+    ? Math.round((aprovados / alunosComMedia.length) * 100)
+    : 0;
+
+  // Função para calcular média de um aluno em uma disciplina específica
+  const calcularMediaDisciplina = (aluno: Usuario, disciplina: string) => {
+    const notas = aluno.notas?.[disciplina] ?? [];
+    if (notas.length === 0) return null;
+    return notas.reduce((acc, n) => acc + n, 0) / notas.length;
+  };
+
+  // Status do aluno baseado na média (disciplina específica ou geral)
+  const getStatusAluno = (aluno: Usuario) => {
+    let mediaParaStatus: number | null = null;
+
+    if (disciplinaFiltro) {
+      mediaParaStatus = calcularMediaDisciplina(aluno, disciplinaFiltro);
+    } else {
+      mediaParaStatus = aluno.media ?? null;
+    }
+
+    if (mediaParaStatus === null) return "-";
+    if (mediaParaStatus >= 7) return "Aprovado";
+    if (mediaParaStatus >= 4) return "Prova Final";
+    return "Reprovado";
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Excelente":
+      case "Aprovado":
         return "bg-green-100 text-green-800 border-green-300";
-      case "Bom":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "Regular":
+      case "Prova Final":
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "Atenção":
+      case "Reprovado":
         return "bg-red-100 text-red-800 border-red-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
   };
 
+  // Filtrar alunos por turma
+  const alunosFiltrados = alunosComMedia.filter(a =>
+    turmaFiltro ? a.turma === turmaFiltro : true
+  );
+
+  const turmas = Array.from(new Set(alunos.map(a => a.turma || "")));
+
   return (
     <Layout title="Painel do Diretor" userType="Diretor">
+      {/* CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-3">
@@ -52,8 +125,8 @@ const Diretor = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-primary">{estatisticas.totalAlunos}</div>
-            <p className="text-sm text-muted-foreground mt-1">Estudantes matriculados</p>
+            <div className="text-4xl font-bold text-primary">{alunos.length}</div>
+            <p className="text-sm text-muted-foreground">Estudantes matriculados</p>
           </CardContent>
         </Card>
 
@@ -65,8 +138,8 @@ const Diretor = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-accent">{estatisticas.totalProfessores}</div>
-            <p className="text-sm text-muted-foreground mt-1">Corpo docente ativo</p>
+            <div className="text-4xl font-bold text-accent">{professores.length}</div>
+            <p className="text-sm text-muted-foreground">Corpo docente ativo</p>
           </CardContent>
         </Card>
 
@@ -78,8 +151,8 @@ const Diretor = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-primary">{estatisticas.mediaGeral}</div>
-            <p className="text-sm text-muted-foreground mt-1">Desempenho da escola</p>
+            <div className="text-4xl font-bold text-primary">{mediaGeralEscola}</div>
+            <p className="text-sm text-muted-foreground">Desempenho da escola</p>
           </CardContent>
         </Card>
 
@@ -91,106 +164,139 @@ const Diretor = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-secondary">{estatisticas.taxaAprovacao}%</div>
-            <p className="text-sm text-muted-foreground mt-1">Taxa de aprovação</p>
+            <div className="text-4xl font-bold text-secondary">{taxaAprovacao}%</div>
+            <p className="text-sm text-muted-foreground">Taxa de aprovação</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="professores" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+      {/* TABS */}
+      <Tabs defaultValue="professores">
+        <TabsList className="grid grid-cols-2">
           <TabsTrigger value="professores">Corpo Docente</TabsTrigger>
           <TabsTrigger value="alunos">Desempenho dos Alunos</TabsTrigger>
         </TabsList>
 
+        {/* PROFESSORES */}
         <TabsContent value="professores">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Informações dos Professores
-              </CardTitle>
+              <CardTitle>Informações dos Professores</CardTitle>
               <CardDescription>Acompanhe o corpo docente da instituição</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-3 px-4 font-semibold">Nome</th>
-                      <th className="text-left py-3 px-4 font-semibold">Disciplina</th>
-                      <th className="text-center py-3 px-4 font-semibold">Turmas</th>
-                      <th className="text-center py-3 px-4 font-semibold">Carga Horária</th>
-                      <th className="text-center py-3 px-4 font-semibold">Status</th>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3">Nome</th>
+                    <th className="text-left p-3">Disciplina</th>
+                    <th className="text-center p-3">Turmas</th>
+                    <th className="text-center p-3">Carga Horária</th>
+                    <th className="text-center p-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {professores.map(prof => (
+                    <tr key={prof.id} className="border-b">
+                      <td className="p-3 font-medium">{prof.name}</td>
+                      <td className="p-3">{prof.disciplina || "-"}</td>
+                      <td className="text-center p-3">{prof.turmas ?? "-"}</td>
+                      <td className="text-center p-3">{prof.cargaHoraria || "-"}</td>
+                      <td className="text-center p-3">
+                        <Badge className="bg-green-100 text-green-800">Ativo</Badge>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {professores.map((prof) => (
-                      <tr key={prof.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                        <td className="py-4 px-4 font-medium">{prof.nome}</td>
-                        <td className="py-4 px-4">{prof.disciplina}</td>
-                        <td className="text-center py-4 px-4">{prof.turmas}</td>
-                        <td className="text-center py-4 px-4">{prof.cargaHoraria}</td>
-                        <td className="text-center py-4 px-4">
-                          <Badge className="bg-green-100 text-green-800 border-green-300">Ativo</Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* ALUNOS */}
         <TabsContent value="alunos">
+          <div className="flex gap-4 mb-4">
+            <select
+              className="border p-2 rounded"
+              value={turmaFiltro}
+              onChange={e => setTurmaFiltro(e.target.value)}
+            >
+              <option value="">Todas as turmas</option>
+              {turmas.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+
+            <select
+              className="border p-2 rounded"
+              value={disciplinaFiltro}
+              onChange={e => setDisciplinaFiltro(e.target.value)}
+            >
+              <option value="">Todas as disciplinas</option>
+              {disciplinas.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5" />
-                Desempenho dos Alunos
-              </CardTitle>
-              <CardDescription>Monitore o rendimento acadêmico dos estudantes</CardDescription>
+              <CardTitle>Desempenho dos Alunos</CardTitle>
+              <CardDescription>Monitore o rendimento acadêmico</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-3 px-4 font-semibold">Aluno</th>
-                      <th className="text-left py-3 px-4 font-semibold">Turma</th>
-                      <th className="text-center py-3 px-4 font-semibold">Média</th>
-                      <th className="text-center py-3 px-4 font-semibold">Faltas</th>
-                      <th className="text-center py-3 px-4 font-semibold">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {alunosDesempenho.map((aluno, index) => (
-                      <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
-                        <td className="py-4 px-4 font-medium">{aluno.nome}</td>
-                        <td className="py-4 px-4">{aluno.turma}</td>
-                        <td className="text-center py-4 px-4 font-semibold">{aluno.media.toFixed(1)}</td>
-                        <td className="text-center py-4 px-4">{aluno.faltas}</td>
-                        <td className="text-center py-4 px-4">
-                          <Badge className={getStatusColor(aluno.status)}>{aluno.status}</Badge>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3">Aluno</th>
+                    <th className="text-left p-3">Turma</th>
+                    {disciplinaFiltro && <th className="text-center p-3">Notas ({disciplinaFiltro})</th>}
+                    <th className="text-center p-3">Média</th>
+                    <th className="text-center p-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {alunosFiltrados.map(aluno => {
+                    const mediaDisciplina = disciplinaFiltro
+                      ? calcularMediaDisciplina(aluno, disciplinaFiltro)
+                      : aluno.media;
+
+                    const notasDisciplina = disciplinaFiltro
+                      ? aluno.notas?.[disciplinaFiltro] ?? []
+                      : [];
+
+                    const status = getStatusAluno(aluno);
+
+                    return (
+                      <tr key={aluno.id} className="border-b">
+                        <td className="p-3 font-medium">{aluno.name}</td>
+                        <td className="p-3">{aluno.turma || "-"}</td>
+                        {disciplinaFiltro && (
+                          <td className="text-center p-3">
+                            {notasDisciplina.length > 0
+                              ? notasDisciplina.join(", ")
+                              : "-"}
+                          </td>
+                        )}
+                        <td className="text-center p-3">
+                          {mediaDisciplina !== null ? mediaDisciplina.toFixed(1) : "-"}
+                        </td>
+                        <td className="text-center p-3">
+                          <Badge className={getStatusColor(status)}>{status}</Badge>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    );
+                  })}
+                </tbody>
+              </table>
 
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-yellow-900 mb-1">Alunos que Necessitam Atenção</h4>
+              {/* Aviso de atenção */}
+              {alunosFiltrados.some(a => (disciplinaFiltro ? calcularMediaDisciplina(a, disciplinaFiltro) ?? 0 : a.media ?? 0) < 7) && (
+                <div className="mt-6 p-4 bg-yellow-50 border rounded-lg">
+                  <div className="flex gap-3">
+                    <AlertCircle className="text-yellow-600" />
                     <p className="text-sm text-yellow-800">
-                      1 aluno com média abaixo de 6.0 e/ou mais de 10 faltas requer acompanhamento especial.
+                      Alguns alunos estão com média abaixo de 7 e requerem acompanhamento.
                     </p>
                   </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
