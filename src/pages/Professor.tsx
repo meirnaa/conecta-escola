@@ -41,7 +41,7 @@ const Professor = () => {
   const [alunosFiltrados, setAlunosFiltrados] = useState<Usuario[]>([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState("");
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState("");
-  const [bimestreSelecionado, setBimestreSelecionado] = useState(0);
+  const [bimestreSelecionado, setBimestreSelecionado] = useState<number | null>(0);
 
   const [novaAula, setNovaAula] = useState("");
   const [dataAula, setDataAula] = useState("");
@@ -54,7 +54,8 @@ const Professor = () => {
   const [aulas, setAulas] = useState<Aula[]>([]);
   const [avisos, setAvisos] = useState<Aviso[]>([]);
 
-  // Buscar alunos do backend
+  const [notasTemp, setNotasTemp] = useState<Record<number, string>>({});
+
   useEffect(() => {
     const fetchAlunos = async () => {
       try {
@@ -68,10 +69,9 @@ const Professor = () => {
     fetchAlunos();
   }, []);
 
-  // Atualiza alunos filtrados por turma
   useEffect(() => {
     setAlunosFiltrados(users.filter(u => u.role === "aluno" && u.turma === turmaSelecionada));
-    setFrequencia([]); // resetar frequência ao trocar de turma
+    setFrequencia([]);
   }, [turmaSelecionada, users]);
 
   useEffect(() => {
@@ -79,48 +79,60 @@ const Professor = () => {
       try {
         const res = await fetch("http://localhost:3333/avisos");
         const data: Aviso[] = await res.json();
-        setAvisos(data); // inicializa com os avisos existentes
+        setAvisos(data);
       } catch (err) {
         console.error("Erro ao buscar avisos:", err);
       }
     };
     fetchAvisos();
   }, []);
-  
 
   const turmas = Array.from(new Set(users.filter(u => u.role === "aluno").map(a => a.turma || "")));
 
-  // Cards do topo
   const totalAlunos = users.filter(u => u.role === "aluno").length;
   const turmasAtivas = turmas.length;
   const totalAvisos = avisos.length;
 
-  // Lançar nota e salvar no backend
-  const handleLancarNota = async (alunoId: number, nota: string) => {
-    const aluno = users.find(a => a.id === alunoId);
-    if (!aluno) return;
+  const handleChangeNota = (alunoId: number, value: string) => {
+    setNotasTemp(prev => ({ ...prev, [alunoId]: value }));
+  };
 
-    if (!aluno.notas) aluno.notas = {};
-    if (!aluno.notas[disciplinaSelecionada]) aluno.notas[disciplinaSelecionada] = [];
-    aluno.notas[disciplinaSelecionada][bimestreSelecionado] = parseFloat(nota);
+  const handleLancarNotas = async () => {
+    if (!turmaSelecionada || !disciplinaSelecionada || bimestreSelecionado === null) {
+      toast({ title: "Erro", description: "Selecione turma, disciplina e bimestre" });
+      return;
+    }
+
+    const alunosSemNota = alunosFiltrados.filter(a => !notasTemp[a.id] || notasTemp[a.id] === "");
+    if (alunosSemNota.length > 0) {
+      toast({ title: "Erro", description: "Preencha todas as notas antes de enviar" });
+      return;
+    }
 
     try {
-      const res = await fetch(`http://localhost:3333/users/${aluno.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(aluno),
-      });
+      const atualizados = [...users];
 
-      if (!res.ok) throw new Error("Erro ao atualizar nota");
+      for (const aluno of alunosFiltrados) {
+        const nota = parseFloat(notasTemp[aluno.id]);
+        if (!aluno.notas) aluno.notas = {};
+        if (!aluno.notas[disciplinaSelecionada]) aluno.notas[disciplinaSelecionada] = [];
+        aluno.notas[disciplinaSelecionada][bimestreSelecionado] = nota;
 
-      setUsers([...users]);
-      toast({ title: "Nota registrada", description: `${aluno.name} - ${disciplinaSelecionada}` });
+        await fetch(`http://localhost:3333/users/${aluno.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(aluno),
+        });
+      }
+
+      setUsers(atualizados);
+      setNotasTemp({});
+      toast({ title: "Notas lançadas", description: `Notas da turma ${turmaSelecionada} registradas com sucesso` });
     } catch (err) {
-      toast({ title: "Erro", description: "Falha ao salvar a nota" });
+      toast({ title: "Erro", description: "Falha ao registrar notas" });
     }
   };
 
-  // Registrar aula
   const handleRegistrarAula = async () => {
     if (!turmaSelecionada || !dataAula || !novaAula) {
       toast({ title: "Erro", description: "Preencha todos os campos da aula" });
@@ -155,13 +167,12 @@ const Professor = () => {
     }
   };
 
-  // Enviar aviso
   const handleEnviarAviso = async () => {
     if (!tituloAviso || !novoAviso || !turmaAviso) {
       toast({ title: "Erro", description: "Preencha todos os campos do aviso" });
       return;
     }
-  
+
     const aviso: Aviso = {
       id: Date.now(),
       turma: turmaAviso,
@@ -169,18 +180,18 @@ const Professor = () => {
       mensagem: novoAviso,
       data: new Date().toISOString(),
     };
-  
+
     try {
       const res = await fetch("http://localhost:3333/avisos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(aviso),
       });
-  
+
       if (!res.ok) throw new Error("Erro ao salvar aviso");
-  
+
       const savedAviso = await res.json();
-      setAvisos(prev => [...prev, savedAviso]); // adiciona o aviso salvo
+      setAvisos(prev => [...prev, savedAviso]);
       setNovoAviso("");
       setTituloAviso("");
       setTurmaAviso("");
@@ -190,15 +201,14 @@ const Professor = () => {
       console.error(err);
     }
   };
-  
 
   const toggleFrequencia = (id: number) => {
     setFrequencia(prev =>
       prev.includes(id)
-        ? prev.filter(alunoId => alunoId !== id) // remove
-        : [...prev, id] // adiciona
+        ? prev.filter(alunoId => alunoId !== id)
+        : [...prev, id]
     );
-  };  
+  };
 
   return (
     <Layout title="Painel do Professor" userType="Professor">
@@ -234,7 +244,7 @@ const Professor = () => {
           <TabsTrigger value="avisos">Enviar Avisos</TabsTrigger>
         </TabsList>
 
-        {/* Lançamento de Notas */}
+        {/* Notas */}
         <TabsContent value="notas">
           <Card>
             <CardHeader>
@@ -266,14 +276,13 @@ const Professor = () => {
 
                 <select
                   className="w-full h-10 px-3 rounded-lg border border-input bg-background"
-                  value={bimestreSelecionado}
+                  value={bimestreSelecionado ?? 0}
                   onChange={e => setBimestreSelecionado(parseInt(e.target.value))}
                 >
                   {bimestres.map((b, i) => <option key={i} value={i}>{b}</option>)}
                 </select>
               </div>
 
-              {/* Tabela de Notas */}
               <div className="border border-border rounded-lg overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -296,8 +305,8 @@ const Professor = () => {
                             step={0.1}
                             placeholder="0.0"
                             className="max-w-[100px] mx-auto text-center"
-                            defaultValue={aluno.notas?.[disciplinaSelecionada]?.[bimestreSelecionado] || ""}
-                            onBlur={e => handleLancarNota(aluno.id, e.target.value)}
+                            value={notasTemp[aluno.id] ?? aluno.notas?.[disciplinaSelecionada]?.[bimestreSelecionado] ?? ""}
+                            onChange={e => handleChangeNota(aluno.id, e.target.value)}
                           />
                         </td>
                       </tr>
@@ -305,11 +314,20 @@ const Professor = () => {
                   </tbody>
                 </table>
               </div>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                  onClick={handleLancarNotas}
+                >
+                  Lançar Notas
+                </button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Registrar Aulas */}
+        {/* Aulas */}
         <TabsContent value="aulas">
           <Card>
             <CardHeader>
@@ -341,7 +359,6 @@ const Professor = () => {
                 onChange={e => setNovaAula(e.target.value)}
               />
 
-              {/* Frequência*/}
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle>Frequência da Turma</CardTitle>
@@ -349,18 +366,37 @@ const Professor = () => {
                 </CardHeader>
                 <CardContent>
                   {turmaSelecionada ? (
-                    <div className="space-y-1 max-h-80 overflow-y-auto">
-                      {[...alunosFiltrados].sort((a, b) => a.name.localeCompare(b.name)).map(aluno => (
-                        <div key={aluno.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={frequencia.includes(aluno.id)}
-                            onChange={() => toggleFrequencia(aluno.id)}
-                          />
-                          <span>{aluno.name}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <>
+                      <div className="flex justify-end mb-2">
+                        <button
+                          className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                          onClick={() => {
+                            if (frequencia.length === alunosFiltrados.length) {
+                              // desmarca todos
+                              setFrequencia([]);
+                            } else {
+                              // marca todos
+                              setFrequencia(alunosFiltrados.map(a => a.id));
+                            }
+                          }}
+                        >
+                          {frequencia.length === alunosFiltrados.length ? "Deselecionar Todos" : "Selecionar Todos"}
+                        </button>
+                      </div>
+
+                      <div className="space-y-1 max-h-80 overflow-y-auto">
+                        {[...alunosFiltrados].sort((a, b) => a.name.localeCompare(b.name)).map(aluno => (
+                          <div key={aluno.id} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={frequencia.includes(aluno.id)}
+                              onChange={() => toggleFrequencia(aluno.id)}
+                            />
+                            <span>{aluno.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   ) : (
                     <p>Selecione uma turma para marcar presença</p>
                   )}
@@ -381,7 +417,7 @@ const Professor = () => {
           </Card>
         </TabsContent>
 
-        {/* Enviar Avisos */}
+        {/* Avisos */}
         <TabsContent value="avisos">
           <Card>
             <CardHeader>

@@ -111,6 +111,17 @@ const Diretor = () => {
     turmaFiltro ? a.turma === turmaFiltro : true
   );
 
+  // Ordenar alunos: se todas as turmas selecionadas, ordena por turma e depois nome; senão, apenas por nome
+  const alunosOrdenados = [...alunosFiltrados].sort((a, b) => {
+    if (!turmaFiltro) {
+      if ((a.turma || "") < (b.turma || "")) return -1;
+      if ((a.turma || "") > (b.turma || "")) return 1;
+    }
+    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+    return 0;
+  });
+
   const turmas = Array.from(new Set(alunos.map(a => a.turma || "")));
 
   return (
@@ -252,7 +263,7 @@ const Diretor = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {alunosFiltrados.map(aluno => {
+                  {alunosOrdenados.map(aluno => {
                     const mediaDisciplina = disciplinaFiltro
                       ? calcularMediaDisciplina(aluno, disciplinaFiltro)
                       : aluno.media;
@@ -287,7 +298,7 @@ const Diretor = () => {
               </table>
 
               {/* Aviso de atenção */}
-              {alunosFiltrados.some(a => (disciplinaFiltro ? calcularMediaDisciplina(a, disciplinaFiltro) ?? 0 : a.media ?? 0) < 7) && (
+              {alunosOrdenados.some(a => (disciplinaFiltro ? calcularMediaDisciplina(a, disciplinaFiltro) ?? 0 : a.media ?? 0) < 7) && (
                 <div className="mt-6 p-4 bg-yellow-50 border rounded-lg">
                   <div className="flex gap-3">
                     <AlertCircle className="text-yellow-600" />

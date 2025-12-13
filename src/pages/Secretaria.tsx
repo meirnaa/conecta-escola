@@ -43,7 +43,7 @@ const [alunoEmail, setAlunoEmail] = useState("");
 const [alunoSenha, setAlunoSenha] = useState("");
 const [error, setError] = useState<string | null>(null);
 
-const handleCadastrarAluno = async () => {
+const handleCadastrarAluno = async (p0: string) => {
   try {
     const res = await fetch("http://localhost:3333/register", {
       method: "POST",
@@ -103,7 +103,7 @@ const [profEmail, setProfEmail] = useState("");
 const [profSenha, setProfSenha] = useState("");
 
 
-  const handleCadastrarProfessor = async () => {
+  const handleCadastrarProfessor = async (p0: string) => {
     try {
       const res = await fetch("http://localhost:3333/register", {
         method: "POST",

@@ -32,6 +32,9 @@
       "Geografia": [
         7.5,
         10
+      ],
+      "Matemática": [
+        6.8
       ]
     }
   },
@@ -47,5 +50,31 @@
     "email": "joana@hotmail.com",
     "password": "12312312",
     "role": "professor"
+  },
+  {
+    "id": 1765640782468,
+    "status": "ativo",
+    "name": "teresa",
+    "email": "teresa@gmail.com",
+    "password": "12345678",
+    "role": "aluno",
+    "nascimento": "2017-10-29",
+    "cpf": "12345678901",
+    "responsavel": "lygia",
+    "telefone": "86123456789",
+    "turma": "1º Ano A"
+  },
+  {
+    "id": 1765640847297,
+    "status": "ativo",
+    "name": "ana laura",
+    "email": "laura@gmail.com",
+    "password": "12345123",
+    "role": "aluno",
+    "nascimento": "2017-11-28",
+    "cpf": "12309875643",
+    "responsavel": "mara",
+    "telefone": "86767431234",
+    "turma": "1º Ano A"
   }
 ]
