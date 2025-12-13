@@ -2,9 +2,9 @@
 
 ## 1. Introdução
 
-Este trabalho apresenta o desenvolvimento de um **Sistema de Gestão Escolar**, criado com o framework **Next.js**, com o objetivo de informatizar e otimizar os processos acadêmicos e administrativos de uma instituição de ensino.
+Este trabalho apresenta o desenvolvimento do SAGE - **Sistema de Gestão Escolar**, criado com o objetivo de informatizar e otimizar os processos acadêmicos e administrativos de uma instituição de ensino.
 
-O sistema foi projetado para atender diferentes perfis de usuários — **Professor, Aluno, Secretaria e Diretor** — cada um com permissões específicas, garantindo organização, segurança e eficiência no gerenciamento das informações escolares.
+O SAGE foi projetado para atender diferentes perfis de usuários — **Professor, Aluno, Secretaria e Diretor** — cada um com permissões específicas, garantindo organização, segurança e eficiência no gerenciamento das informações escolares.
 
 ---
 
@@ -116,7 +116,7 @@ http://localhost:3000
 
 ## 6. Considerações Finais
 
-O Sistema de Gestão Escolar desenvolvido atende aos objetivos propostos, oferecendo uma solução funcional e organizada para o controle acadêmico e administrativo. A utilização do **Next.js** proporciona desempenho, escalabilidade e facilidade de manutenção, tornando o sistema adequado para futuras evoluções.
+O SAGE atende aos objetivos propostos, oferecendo uma solução funcional e organizada para o controle acadêmico e administrativo.
 
 ---
 
