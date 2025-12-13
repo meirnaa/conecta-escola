@@ -145,8 +145,8 @@ const Professor = () => {
                   </thead>
                   <tbody>
                     {alunos.map((aluno) => (
-                      <tr key={aluno.id} className="border-b border-border">
-                        <td className="py-3 px-4">{aluno.matricula}</td>
+                      <tr key={aluno.i} className="border-b border-border">
+                        <td className="py-3 px-4">{aluno.id}</td>
                         <td className="py-3 px-4">{aluno.nome}</td>
                         <td className="py-3 px-4">
                           <Input

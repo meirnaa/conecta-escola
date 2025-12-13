@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const Secretaria = () => {
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
 
   // Estados para armazenar usuários
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -68,6 +67,11 @@ const handleCadastrarAluno = async () => {
       return;
     }
 
+    const novoAluno = await res.json();
+
+    // Atualiza o state de alunos imediatamente
+    setAlunos((prev) => [...prev, novoAluno]);
+
     toast({
       title: "Cadastro Realizado",
       description: `Aluno ${alunoNome} cadastrado com sucesso.`,
@@ -123,6 +127,11 @@ const [profSenha, setProfSenha] = useState("");
         return;
       }
 
+      const novoProfessor = await res.json();
+
+      // Atualiza o state de professores imediatamente
+      setProfessores((prev) => [...prev, novoProfessor]);
+
       toast({
         title: "Sucesso",
         description: "Professor cadastrado com sucesso!",
@@ -145,15 +154,70 @@ const [profSenha, setProfSenha] = useState("");
     }
   };
 
-  const handleEditar = (tipo: string, nome: string) => {
-    toast({
-      title: "Edição Iniciada",
-      description: `Editando informações de ${nome}.`,
-    });
+  //EDIÇÃO
+
+  const [editingAluno, setEditingAluno] = useState<any | null>(null);
+  const [editingProfessor, setEditingProfessor] = useState<any | null>(null);
+
+    const handleEditarAluno = (aluno: any) => {
+    setEditingAluno(aluno); 
   };
+
+  const handleEditarProfessor = (prof: any) => {
+    setEditingProfessor(prof);
+  };
+  
+
+const handleSalvarEdicaoAluno = async () => {
+  if (!editingAluno) return;
+
+  const res = await fetch(`http://localhost:3333/users/${editingAluno.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(editingAluno),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    toast({ title: "Erro", description: data.error || "Erro ao editar aluno" });
+    return;
+  }
+
+  const updatedAluno = await res.json();
+  setAlunos(prev =>
+    prev.map(a => (a.id === updatedAluno.id ? updatedAluno : a))
+  );
+  setEditingAluno(null);
+  toast({ title: "Sucesso", description: "Aluno atualizado!" });
+};
+
+const handleSalvarEdicaoProfessor = async () => {
+  if (!editingProfessor) return;
+
+  const res = await fetch(`http://localhost:3333/users/${editingProfessor.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(editingProfessor),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    toast({ title: "Erro", description: data.error || "Erro ao editar professor" });
+    return;
+  }
+
+  const updatedProf = await res.json();
+  setProfessores(prev =>
+    prev.map(p => (p.id === updatedProf.id ? updatedProf : p))
+  );
+  setEditingProfessor(null);
+  toast({ title: "Sucesso", description: "Professor atualizado!" });
+};
+
 
   return (
     <Layout title="Painel da Secretaria" userType="Secretaria">
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <Card>
         <CardHeader className="pb-3">
@@ -306,8 +370,6 @@ const [profSenha, setProfSenha] = useState("");
                   <Input
                     value={profEmail} onChange={(e) => setProfEmail(e.target.value)} type="email"
                     placeholder="Digite o email do professor"
-                    value={profEmail}
-                    onChange={(e) => setProfEmail(e.target.value)}
                   />
                 </div>
 
@@ -338,18 +400,7 @@ const [profSenha, setProfSenha] = useState("");
                 </CardTitle>
                 <CardDescription>Busque e edite informações dos alunos</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Buscar por nome ou matrícula..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button variant="outline">
-                    <Search className="w-4 h-4" />
-                  </Button>
-                </div>
+              <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -364,7 +415,7 @@ const [profSenha, setProfSenha] = useState("");
                     <tbody>
                       {alunos.map((aluno) => (
                         <tr key={aluno.id} className="border-b border-border hover:bg-muted/50">
-                          <td className="py-3 px-4">{aluno.matricula}</td>
+                          <td className="py-3 px-4">{aluno.id}</td>
                           <td className="py-3 px-4 font-medium">{aluno.name}</td>
                           <td className="py-3 px-4">{aluno.turma}</td>
                           <td className="text-center py-3 px-4">
@@ -374,7 +425,7 @@ const [profSenha, setProfSenha] = useState("");
                           </td>
                           <td className="text-center py-3 px-4">
                             <Button
-                              onClick={() => handleEditar("Aluno", aluno.nome)}
+                              onClick={() => handleEditarAluno(aluno)}
                               variant="outline"
                               size="sm"
                             >
@@ -390,6 +441,86 @@ const [profSenha, setProfSenha] = useState("");
               </CardContent>
             </Card>
 
+            {/* Formulário de edição de Aluno */}
+            {editingAluno && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Editar Aluno: {editingAluno.name}</CardTitle>
+                  <CardDescription>Atualize os dados do aluno</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input
+                    value={editingAluno.name}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, name: e.target.value })
+                    }
+                    placeholder="Nome do aluno"
+                  />
+                  <Input
+                    value={editingAluno.email}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, email: e.target.value })
+                    }
+                    placeholder="Email"
+                  />
+                  <Input
+                    value={editingAluno.nascimento}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, nascimento: e.target.value })
+                    }
+                    type="date"
+                    placeholder="Data de nascimento"
+                  />
+                  <Input
+                    value={editingAluno.cpf}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, cpf: e.target.value })
+                    }
+                    placeholder="CPF"
+                  />
+                  <Input
+                    value={editingAluno.responsavel}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, responsavel: e.target.value })
+                    }
+                    placeholder="Responsável"
+                  />
+                  <Input
+                    value={editingAluno.telefone}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, telefone: e.target.value })
+                    }
+                    placeholder="Telefone"
+                  />
+                  <select
+                    value={editingAluno.turma}
+                    onChange={(e) =>
+                      setEditingAluno({ ...editingAluno, turma: e.target.value })
+                    }
+                    className="w-full h-10 px-3 rounded-lg border border-input bg-background"
+                  >
+                    <option value="">Selecione uma turma</option>
+                    <option>1º Ano A</option>
+                    <option>2º Ano A</option>
+                    <option>3º Ano A</option>
+                  </select>
+
+                  <div className="flex gap-2">
+                    <Button onClick={handleSalvarEdicaoAluno} className="flex-1">
+                      Salvar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditingAluno(null)}
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -399,12 +530,6 @@ const [profSenha, setProfSenha] = useState("");
                 <CardDescription>Busque e edite informações dos professores</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input placeholder="Buscar por nome ou CPF..." className="flex-1" />
-                  <Button variant="outline">
-                    <Search className="w-4 h-4" />
-                  </Button>
-                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -418,12 +543,12 @@ const [profSenha, setProfSenha] = useState("");
                     <tbody>
                       {professores.map((prof) => (
                         <tr key={prof.id} className="border-b border-border hover:bg-muted/50">
-                          <td className="py-3 px-4 font-medium">{prof.nome}</td>
+                          <td className="py-3 px-4 font-medium">{prof.name}</td>
                           <td className="py-3 px-4">{prof.cpf}</td>
                           <td className="py-3 px-4">{prof.disciplina}</td>
                           <td className="text-center py-3 px-4">
                             <Button
-                              onClick={() => handleEditar("Professor", prof.nome)}
+                              onClick={() => handleEditarProfessor(prof)}
                               variant="outline"
                               size="sm"
                             >
@@ -438,8 +563,96 @@ const [profSenha, setProfSenha] = useState("");
                 </div>
               </CardContent>
             </Card>
+
+            {/* Formulário de edição de Professor */}
+            {editingProfessor && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Editar Professor: {editingProfessor.name}</CardTitle>
+                  <CardDescription>Atualize os dados do professor</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input
+                    value={editingProfessor.name}
+                    onChange={(e) =>
+                      setEditingProfessor({ ...editingProfessor, name: e.target.value })
+                    }
+                    placeholder="Nome do professor"
+                  />
+                  <Input
+                    value={editingProfessor.email}
+                    onChange={(e) =>
+                      setEditingProfessor({ ...editingProfessor, email: e.target.value })
+                    }
+                    placeholder="Email"
+                  />
+                  <Input
+                    value={editingProfessor.dataNascimento}
+                    onChange={(e) =>
+                      setEditingProfessor({
+                        ...editingProfessor,
+                        dataNascimento: e.target.value,
+                      })
+                    }
+                    type="date"
+                    placeholder="Data de nascimento"
+                  />
+                  <Input
+                    value={editingProfessor.cpf}
+                    onChange={(e) =>
+                      setEditingProfessor({ ...editingProfessor, cpf: e.target.value })
+                    }
+                    placeholder="CPF"
+                  />
+                  <Input
+                    value={editingProfessor.formacao}
+                    onChange={(e) =>
+                      setEditingProfessor({ ...editingProfessor, formacao: e.target.value })
+                    }
+                    placeholder="Formação"
+                  />
+                  <Input
+                    value={editingProfessor.disciplina}
+                    onChange={(e) =>
+                      setEditingProfessor({
+                        ...editingProfessor,
+                        disciplina: e.target.value,
+                      })
+                    }
+                    placeholder="Disciplina"
+                  />
+                  <select
+                    value={editingProfessor.cargaHoraria}
+                    onChange={(e) =>
+                      setEditingProfessor({
+                        ...editingProfessor,
+                        cargaHoraria: e.target.value,
+                      })
+                    }
+                    className="w-full h-10 px-3 rounded-lg border border-input bg-background"
+                  >
+                    <option>20 horas</option>
+                    <option>40 horas</option>
+                  </select>
+
+                  <div className="flex gap-2">
+                    <Button onClick={handleSalvarEdicaoProfessor} className="flex-1">
+                      Salvar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditingProfessor(null)}
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
+
       </Tabs>
     </Layout>
   );

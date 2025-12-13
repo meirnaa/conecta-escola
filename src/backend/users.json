@@ -7,15 +7,36 @@
     "role": "secretaria"
   },
   {
+    "id": 1765582477712,
+    "name": "maria",
+    "email": "juliana@gmail.com",
+    "password": "12312312",
+    "role": "diretor"
+  },
+  {
     "id": 1765585723136,
+    "status": "ativo",
     "name": "junior",
-    "email": "junior@gmail.com",
+    "email": "junior@hotmail.com",
     "password": "12345654",
     "role": "aluno",
     "nascimento": "2011-07-14",
     "cpf": "45612345612",
     "responsavel": "josé junior",
     "telefone": "78451207777",
-    "turma": "1º Ano A"
+    "turma": "2º Ano A"
+  },
+  {
+    "id": 1765587000848,
+    "status": "ativo",
+    "name": "joana",
+    "cpf": "11312312311",
+    "dataNascimento": "1978-04-12",
+    "formacao": "licenciatura em portugues",
+    "disciplina": "Português",
+    "cargaHoraria": "20 horas",
+    "email": "joana@hotmail.com",
+    "password": "12312312",
+    "role": "professor"
   }
 ]

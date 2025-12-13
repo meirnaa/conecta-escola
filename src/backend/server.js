@@ -8,7 +8,7 @@ app.use(express.json());
 
 const USERS_FILE = "./users.json";
 
-/* 🔧 função utilitária */
+/* função utilitária */
 function readUsers() {
   try {
     const data = fs.readFileSync(USERS_FILE, "utf-8");
@@ -19,6 +19,35 @@ function readUsers() {
   }
 }
 
+/* EDIÇÃO */
+app.put("/users/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, email, password, role, status, ...otherData } = req.body;
+
+  const users = readUsers();
+
+  const userIndex = users.findIndex((u) => u.id === parseInt(id));
+
+  if (userIndex === -1) {
+    return res.status(404).json({ error: "Usuário não encontrado" });
+  }
+
+  const updatedUser = {
+    ...users[userIndex],
+    name,
+    email,
+    password,
+    role,
+    status,
+    ...otherData, // Adiciona qualquer outro dado passado
+  };
+
+  users[userIndex] = updatedUser;
+  saveUsers(users);
+
+  res.json(updatedUser);
+});
+
 function saveUsers(users) {
   try {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
@@ -27,7 +56,7 @@ function saveUsers(users) {
   }
 }
 
-/* 📝 CADASTRO */
+/* CADASTRO */
 app.post("/register", (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -54,7 +83,7 @@ app.post("/register", (req, res) => {
   res.status(201).json(newUser);
 });
 
-/* 🔐 LOGIN */
+/* LOGIN */
 app.post("/login", (req, res) => {
   const { email, password, role } = req.body;
 
@@ -74,7 +103,7 @@ app.post("/login", (req, res) => {
   res.json(user);
 });
 
-/* 🔎 BUSCAR USUÁRIOS */
+/* BUSCAR USUÁRIOS */
 app.get("/users", (req, res) => {
   const users = readUsers();
   res.json(users);
