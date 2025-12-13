@@ -104,7 +104,7 @@ npm run dev
 
 - Acessar a pasta do backend do projeto:
 cd conecta-escola/
-- Executar o projeto
+- Executar o projeto:
 node server.js
 
 O sistema implementa **autenticação e autorização por perfil**, garantindo que cada usuário tenha acesso apenas às funcionalidades correspondentes ao seu papel dentro da instituição.
@@ -121,7 +121,10 @@ O SAGE atende aos objetivos propostos, oferecendo uma solução funcional e orga
 
 ---
 
-## 7. Componentes
+## 7. Slide
+https://www.canva.com/design/DAG3yAJhLCs/fpPcF4ijUxUXwAMxX-idpg/edit?utm_content=DAG3yAJhLCs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+## 8. Componentes
 - Lina Gabrielly
 - Teresa
 - Meir Naã
