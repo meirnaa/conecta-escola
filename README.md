@@ -96,15 +96,16 @@ bash
 # Clonar o repositório
 git clone https://github.com/meirnaa/conecta-escola.git
 
-# Acessar a pasta do projeto
+- Acessar a pasta do projeto:
 cd conecta-escola
-# Executar o projeto
+
+- Executar o projeto:
 npm run dev
 
-# Acessar a pasta do backend do projeto
+- Acessar a pasta do backend do projeto:
 cd conecta-escola/
-# Executar o projeto
-npm run dev
+- Executar o projeto
+node server.js
 
 O sistema implementa **autenticação e autorização por perfil**, garantindo que cada usuário tenha acesso apenas às funcionalidades correspondentes ao seu papel dentro da instituição.
 
@@ -125,6 +126,3 @@ O SAGE atende aos objetivos propostos, oferecendo uma solução funcional e orga
 - Teresa
 - Meir Naã
 - Luana
-
-
-
