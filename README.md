@@ -92,8 +92,7 @@ Funcionalidades:
 
 ### 5.2 Passos para Execução
 
-bash
-# Clonar o repositório
+- Clonar o repositório:
 git clone https://github.com/meirnaa/conecta-escola.git
 
 - Acessar a pasta do projeto:
@@ -104,6 +103,7 @@ npm run dev
 
 - Acessar a pasta do backend do projeto:
 cd conecta-escola/
+
 - Executar o projeto:
 node server.js
 
