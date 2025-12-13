@@ -121,8 +121,10 @@ O SAGE atende aos objetivos propostos, oferecendo uma solução funcional e orga
 
 ---
 
-## 7. Slide
+## 7. Slide e Documento de Visão
 https://www.canva.com/design/DAG3yAJhLCs/fpPcF4ijUxUXwAMxX-idpg/edit?utm_content=DAG3yAJhLCs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+https://docs.google.com/document/d/1MuozxsMA1AD6Cw5MufXfFkup8Oq-jtMN/edit?usp=sharing&ouid=103506852068100565558&rtpof=true&sd=true
 
 ## 8. Componentes
 - Lina Gabrielly
