@@ -68,8 +68,8 @@ app.post("/login", async (req, res) => {
     const roleMap = {
       aluno: "users_alunos",
       professor: "users_professores",
-      diretor: "users_diretores",
-      secretaria: "users_secretarias",
+      diretor: "users_diretor",
+      secretaria: "users_secretaria",
     };
 
     const collectionName = roleMap[role];
