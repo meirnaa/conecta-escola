@@ -1,4 +1,10 @@
 const db = require("./firebase");
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 /* 📝 CADASTRO */
 app.post("/register", async (req, res) => {
