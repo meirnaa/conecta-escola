@@ -20,13 +20,27 @@ type BoletimItem = {
   faltas: number;
 };
 
+type FirestoreTimestamp = {
+  _seconds: number;
+  _nanoseconds: number;
+};
+
 type AgendaItem = {
   id: string;
-  data: string;
+  data: FirestoreTimestamp;
   disciplina: string;
   titulo: string;
+  mensagem: string;
   tipo: string;
 };
+
+const formatarData = (timestamp: FirestoreTimestamp) => {
+  if (!timestamp || !timestamp._seconds) return "";
+
+  const date = new Date(timestamp._seconds * 1000);
+  return date.toLocaleDateString("pt-BR");
+};
+
 
 const Aluno = () => {
   /* 🔹 STATES */
@@ -92,6 +106,7 @@ const Aluno = () => {
     (acc, item) => acc + item.faltas,
     0
   );
+
 
   return (
     <Layout title="Painel do Aluno" userType="Aluno">
@@ -230,8 +245,9 @@ const Aluno = () => {
                     <Badge>{item.tipo}</Badge>
                   </div>
                   <p className="font-semibold">{item.titulo}</p>
+                  <p className="font-normal">{item.mensagem}</p>
                   <p className="text-sm text-muted-foreground">
-                    {item.data}
+                    {formatarData(item.data)}
                   </p>
                 </div>
               ))}

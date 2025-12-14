@@ -30,6 +30,8 @@ Desenvolver um sistema web capaz de gerenciar atividades acadêmicas e administr
 - shadcn-ui
 - Tailwind CSS
 - NodeJS e Express
+- Lovable
+- Firebase Firestore
 
 ---
 
@@ -107,10 +109,22 @@ cd conecta-escola/
 - Executar o projeto:
 node server.js
 
-- Para testes, utilizar esse perfil
+- Para testes, utilizar os seguintes perfis:
     "email": "maria@gmail.com",
     "password": "12312312",
     "role": "secretaria"
+
+    "email": "fred@gmail.com",
+    "password": "12312312",
+    "role": "diretor"
+
+    "email": "pedrohenrique@sousa",
+    "password": "12312312",
+    "role": "aluno"
+
+    "email": "santana@laura",
+    "password": "12312312",
+    "role": "professor"
 
 O sistema implementa **autenticação e autorização por perfil**, garantindo que cada usuário tenha acesso apenas às funcionalidades correspondentes ao seu papel dentro da instituição.
 

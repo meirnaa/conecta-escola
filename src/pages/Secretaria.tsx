@@ -12,27 +12,42 @@ const Secretaria = () => {
   const { toast } = useToast();
 
   // Estados para armazenar usuários
-  const [usuarios, setUsuarios] = useState<any[]>([]);
   const [alunos, setAlunos] = useState<any[]>([]);
   const [professores, setProfessores] = useState<any[]>([]);
 
   // useEffect para buscar usuários do backend
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const res = await fetch("https://sage-1zk3.onrender.com/users");
-        const data = await res.json();
+useEffect(() => {
+  const fetchAlunos = async () => {
+    try {
+      const res = await fetch(
+        "https://sage-1zk3.onrender.com/users?role=aluno"
+      );
+      if (!res.ok) throw new Error("Erro ao buscar alunos");
+      const data = await res.json();
+      setAlunos(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Erro ao buscar alunos:", err);
+      setAlunos([]);
+    }
+  };
 
-        setUsuarios(data);
-        setAlunos(data.filter((u: any) => u.role === "aluno"));
-        setProfessores(data.filter((u: any) => u.role === "professor"));
-      } catch (err) {
-        console.error("Erro ao buscar usuários:", err);
-      }
-    };
-    
-      fetchUsuarios();
-    }, []);
+  const fetchProfessores = async () => {
+    try {
+      const res = await fetch(
+        "https://sage-1zk3.onrender.com/users?role=professor"
+      );
+      if (!res.ok) throw new Error("Erro ao buscar professores");
+      const data = await res.json();
+      setProfessores(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Erro ao buscar professores:", err);
+      setProfessores([]);
+    }
+  };
+
+  fetchAlunos();
+  fetchProfessores();
+}, []);
 
 const [alunoNome, setAlunoNome] = useState("");
 const [alunoNascimento, setAlunoNascimento] = useState("");

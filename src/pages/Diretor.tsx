@@ -31,15 +31,29 @@ const Diretor = () => {
   const [turmaFiltro, setTurmaFiltro] = useState<string>("");
   const [disciplinaFiltro, setDisciplinaFiltro] = useState<string>("");
 
-  useEffect(() => {
-    const fetchDados = async () => {
-      const res = await fetch("https://sage-1zk3.onrender.com/users");
-      const data: Usuario[] = await res.json();
-      setAlunos(data.filter(u => u.role === "aluno"));
-      setProfessores(data.filter(u => u.role === "professor"));
-    };
-    fetchDados();
-  }, []);
+useEffect(() => {
+  const fetchDados = async () => {
+    try {
+      const [resAlunos, resProfessores] = await Promise.all([
+        fetch("https://sage-1zk3.onrender.com/users?role=aluno"),
+        fetch("https://sage-1zk3.onrender.com/users?role=professor"),
+      ]);
+
+      const alunosData: Usuario[] = await resAlunos.json();
+      const professoresData: Usuario[] = await resProfessores.json();
+
+      setAlunos(alunosData);
+      setProfessores(professoresData);
+    } catch (err) {
+      console.error("Erro ao buscar dados do diretor:", err);
+      setAlunos([]);
+      setProfessores([]);
+    }
+  };
+
+  fetchDados();
+}, []);
+
 
   // Média geral do aluno (todas as disciplinas)
   const calcularMediaGeralAluno = (aluno: Usuario) => {

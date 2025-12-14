@@ -59,20 +59,32 @@ const Professor = () => {
   useEffect(() => {
     const fetchAlunos = async () => {
       try {
-        const res = await fetch("https://sage-1zk3.onrender.com/users");
-        const data: Usuario[] = await res.json();
-        setUsers(data);
+        const res = await fetch("https://sage-1zk3.onrender.com/users?role=aluno");
+        const data = await res.json();
+
+        const listaUsuarios = Array.isArray(data)
+          ? data
+          : Array.isArray(data.users)
+          ? data.users
+          : [];
+
+        setUsers(listaUsuarios);
       } catch (err) {
         console.error("Erro ao buscar alunos:", err);
+        setUsers([]);
       }
     };
+
     fetchAlunos();
   }, []);
 
+
   useEffect(() => {
-    setAlunosFiltrados(users.filter(u => u.role === "aluno" && u.turma === turmaSelecionada));
+    const lista = Array.isArray(users) ? users : [];
+    setAlunosFiltrados(lista.filter(u => u.role === "aluno" && u.turma === turmaSelecionada));
     setFrequencia([]);
   }, [turmaSelecionada, users]);
+
 
   useEffect(() => {
     const fetchAvisos = async () => {
@@ -87,9 +99,14 @@ const Professor = () => {
     fetchAvisos();
   }, []);
 
-  const turmas = Array.from(new Set(users.filter(u => u.role === "aluno").map(a => a.turma || "")));
+  const listaUsuarios = Array.isArray(users) ? users : [];
 
-  const totalAlunos = users.filter(u => u.role === "aluno").length;
+  const turmas = Array.from(
+    new Set(listaUsuarios.filter(u => u.role === "aluno").map(a => a.turma || ""))
+  );
+
+  const totalAlunos = listaUsuarios.filter(u => u.role === "aluno").length;
+
   const turmasAtivas = turmas.length;
   const totalAvisos = avisos.length;
 
