@@ -55,32 +55,59 @@ app.post("/register", async (req, res) => {
 
 
 /* 🔐 LOGIN */
+const bcrypt = require("bcryptjs");
+
 app.post("/login", async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    const collectionName = `users_${role}s`;
+    if (!email || !password || !role) {
+      return res.status(400).json({ error: "Dados inválidos" });
+    }
+
+    const roleMap = {
+      aluno: "users_alunos",
+      professor: "users_professores",
+      diretor: "users_diretores",
+      secretaria: "users_secretarias",
+    };
+
+    const collectionName = roleMap[role];
+
+    if (!collectionName) {
+      return res.status(400).json({ error: "Role inválido" });
+    }
 
     const snapshot = await db
       .collection(collectionName)
       .where("email", "==", email)
-      .where("password", "==", password)
+      .limit(1)
       .get();
+
+    if (snapshot.empty) {
+      return res.status(401).json({ error: "Credenciais inválidas" });
+    }
 
     const userDoc = snapshot.docs[0];
     const userData = userDoc.data();
 
     const isValid = await bcrypt.compare(password, userData.password);
+
     if (!isValid) {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
-    const user = snapshot.docs[0];
-    res.json({ id: user.id, ...user.data() });
+    res.json({
+      id: userDoc.id,
+      ...userData,
+      password: undefined, // 🔒 nunca retorna senha
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("🔥 ERRO LOGIN:", err);
+    res.status(500).json({ error: "Erro interno no servidor" });
   }
 });
+
 
 
 /* ✏️ EDITAR USUÁRIOS */

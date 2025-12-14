@@ -21,7 +21,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3333/login", {
+      const res = await fetch("https://sage-1zk3.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),
