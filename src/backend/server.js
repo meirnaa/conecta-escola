@@ -5,6 +5,12 @@ app.post("/register", async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
+    const allowedRoles = ["aluno", "professor", "diretor", "secretaria"];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ error: "Role inválido" });
+    }
+
     if (!email || !password || !role) {
       return res.status(400).json({ error: "Dados inválidos" });
     }
@@ -22,8 +28,13 @@ app.post("/register", async (req, res) => {
       return res.status(409).json({ error: "Usuário já existe" });
     }
 
+    const bcrypt = require("bcryptjs");
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = {
       ...req.body,
+      password: hashedPassword,
       status: "ativo",
       createdAt: new Date(),
     };
@@ -50,7 +61,11 @@ app.post("/login", async (req, res) => {
       .where("password", "==", password)
       .get();
 
-    if (snapshot.empty) {
+    const userDoc = snapshot.docs[0];
+    const userData = userDoc.data();
+
+    const isValid = await bcrypt.compare(password, userData.password);
+    if (!isValid) {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
