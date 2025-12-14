@@ -130,7 +130,7 @@ app.post("/login", async (req, res) => {
 
     const roleMap = {
       aluno: "users_alunos",
-      professor: "users_professores",
+      professor: "users_professors",
       diretor: "users_diretor",
       secretaria: "users_secretaria",
     };
