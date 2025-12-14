@@ -33,6 +33,10 @@ const Login = () => {
       }
 
       const user = await res.json();
+
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("role", user.role);
+      
       navigate(`/${user.role}`);
     } catch {
       setError("Erro ao conectar com o servidor");

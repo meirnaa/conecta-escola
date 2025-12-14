@@ -53,6 +53,69 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.get("/alunos/:id/boletim", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const alunoDoc = await db.collection("users_alunos").doc(id).get();
+
+    if (!alunoDoc.exists) {
+      return res.status(404).json({ error: "Aluno não encontrado" });
+    }
+
+    const aluno = alunoDoc.data();
+
+    // notas no formato que você já usa
+    const boletim = Object.entries(aluno.notas || {}).map(
+      ([disciplina, notas]) => {
+        const media =
+          notas.reduce((acc, n) => acc + n, 0) / notas.length;
+
+        return {
+          disciplina,
+          nota1: notas[0] ?? 0,
+          nota2: notas[1] ?? 0,
+          nota3: notas[2] ?? 0,
+          media,
+          faltas: aluno.faltas?.[disciplina] ?? 0,
+        };
+      }
+    );
+
+    res.json(boletim);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/alunos/:id/agenda", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const alunoDoc = await db.collection("users_alunos").doc(id).get();
+    if (!alunoDoc.exists) {
+      return res.status(404).json({ error: "Aluno não encontrado" });
+    }
+
+    const { turma } = alunoDoc.data();
+
+    const snapshot = await db
+      .collection("avisos")
+      .where("turma", "==", turma)
+      .get();
+
+    const agenda = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json(agenda);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 /* 🔐 LOGIN */
 const bcrypt = require("bcryptjs");

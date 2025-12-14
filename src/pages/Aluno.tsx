@@ -1,24 +1,81 @@
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, BookOpen, TrendingUp } from "lucide-react";
 
+/* 🔹 TIPOS */
+type BoletimItem = {
+  disciplina: string;
+  nota1: number;
+  nota2: number;
+  nota3: number;
+  media: number;
+  faltas: number;
+};
+
+type AgendaItem = {
+  id: string;
+  data: string;
+  disciplina: string;
+  titulo: string;
+  tipo: string;
+};
+
 const Aluno = () => {
-  const boletim = [
-    { disciplina: "Matemática", nota1: 8.5, nota2: 9.0, nota3: 8.0, media: 8.5, faltas: 2 },
-    { disciplina: "Português", nota1: 9.0, nota2: 8.5, nota3: 9.5, media: 9.0, faltas: 1 },
-    { disciplina: "História", nota1: 7.5, nota2: 8.0, nota3: 7.0, media: 7.5, faltas: 3 },
-    { disciplina: "Geografia", nota1: 8.0, nota2: 8.5, nota3: 8.0, media: 8.2, faltas: 1 },
-    { disciplina: "Ciências", nota1: 9.5, nota2: 9.0, nota3: 9.0, media: 9.2, faltas: 0 },
-  ];
+  /* 🔹 STATES */
+  const [boletim, setBoletim] = useState<BoletimItem[]>([]);
+  const [agenda, setAgenda] = useState<AgendaItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const agenda = [
-    { data: "15/11/2025", disciplina: "Matemática", titulo: "Prova de Álgebra", tipo: "Avaliação" },
-    { data: "18/11/2025", disciplina: "Português", titulo: "Entrega de Redação", tipo: "Trabalho" },
-    { data: "20/11/2025", disciplina: "História", titulo: "Seminário Segunda Guerra", tipo: "Apresentação" },
-    { data: "22/11/2025", disciplina: "Ciências", titulo: "Prática Laboratório", tipo: "Aula Prática" },
-  ];
+  /* 🔹 ID DO ALUNO (vem do login) */
+  const alunoId = localStorage.getItem("userId");
 
+  /* 🔹 BUSCAR DADOS NO BACKEND */
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        const boletimRes = await fetch(
+          `https://sage-1zk3.onrender.com/alunos/${alunoId}/boletim`
+        );
+
+        const agendaRes = await fetch(
+          `https://sage-1zk3.onrender.com/alunos/${alunoId}/agenda`
+        );
+
+        const boletimData = await boletimRes.json();
+        const agendaData = await agendaRes.json();
+
+        setBoletim(boletimData);
+        setAgenda(agendaData);
+      } catch (error) {
+        console.error("Erro ao carregar dados do aluno", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (alunoId) {
+      carregarDados();
+    }
+  }, [alunoId]);
+
+  /* 🔹 LOADING */
+  if (loading) {
+    return (
+      <Layout title="Painel do Aluno" userType="Aluno">
+        <p className="text-center mt-10">Carregando dados...</p>
+      </Layout>
+    );
+  }
+
+  /* 🔹 FUNÇÃO DE STATUS */
   const getStatusColor = (media: number) => {
     if (media >= 9) return "bg-green-100 text-green-800 border-green-300";
     if (media >= 7) return "bg-blue-100 text-blue-800 border-blue-300";
@@ -26,8 +83,19 @@ const Aluno = () => {
     return "bg-red-100 text-red-800 border-red-300";
   };
 
+  /* 🔹 CÁLCULOS */
+  const mediaGeral =
+    boletim.reduce((acc, item) => acc + item.media, 0) /
+    (boletim.length || 1);
+
+  const totalFaltas = boletim.reduce(
+    (acc, item) => acc + item.faltas,
+    0
+  );
+
   return (
     <Layout title="Painel do Aluno" userType="Aluno">
+      {/* 🔹 CARDS SUPERIORES */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-3">
@@ -37,8 +105,12 @@ const Aluno = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-primary">8.5</div>
-            <p className="text-sm text-muted-foreground mt-1">Desempenho Excelente</p>
+            <div className="text-4xl font-bold text-primary">
+              {mediaGeral.toFixed(1)}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Desempenho Geral
+            </p>
           </CardContent>
         </Card>
 
@@ -50,8 +122,12 @@ const Aluno = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-secondary">7</div>
-            <p className="text-sm text-muted-foreground mt-1">Presença Regular</p>
+            <div className="text-4xl font-bold text-secondary">
+              {totalFaltas}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Frequência
+            </p>
           </CardContent>
         </Card>
 
@@ -63,12 +139,17 @@ const Aluno = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-accent">5</div>
-            <p className="text-sm text-muted-foreground mt-1">Em Andamento</p>
+            <div className="text-4xl font-bold text-accent">
+              {boletim.length}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Em Andamento
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* 🔹 BOLETIM */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -76,34 +157,43 @@ const Aluno = () => {
               <BookOpen className="w-5 h-5" />
               Boletim Escolar
             </CardTitle>
-            <CardDescription>Acompanhe suas notas e frequência</CardDescription>
+            <CardDescription>
+              Acompanhe suas notas e frequência
+            </CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 font-semibold">Disciplina</th>
-                    <th className="text-center py-3 px-4 font-semibold">1º Bim</th>
-                    <th className="text-center py-3 px-4 font-semibold">2º Bim</th>
-                    <th className="text-center py-3 px-4 font-semibold">3º Bim</th>
-                    <th className="text-center py-3 px-4 font-semibold">Média</th>
-                    <th className="text-center py-3 px-4 font-semibold">Faltas</th>
-                    <th className="text-center py-3 px-4 font-semibold">Status</th>
+                  <tr className="border-b">
+                    <th className="text-left p-3">Disciplina</th>
+                    <th className="text-center p-3">1º</th>
+                    <th className="text-center p-3">2º</th>
+                    <th className="text-center p-3">3º</th>
+                    <th className="text-center p-3">Média</th>
+                    <th className="text-center p-3">Faltas</th>
+                    <th className="text-center p-3">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {boletim.map((item, index) => (
-                    <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
-                      <td className="py-3 px-4 font-medium">{item.disciplina}</td>
-                      <td className="text-center py-3 px-4">{item.nota1.toFixed(1)}</td>
-                      <td className="text-center py-3 px-4">{item.nota2.toFixed(1)}</td>
-                      <td className="text-center py-3 px-4">{item.nota3.toFixed(1)}</td>
-                      <td className="text-center py-3 px-4 font-semibold">{item.media.toFixed(1)}</td>
-                      <td className="text-center py-3 px-4">{item.faltas}</td>
-                      <td className="text-center py-3 px-4">
+                    <tr key={index} className="border-b">
+                      <td className="p-3">{item.disciplina}</td>
+                      <td className="text-center p-3">{item.nota1}</td>
+                      <td className="text-center p-3">{item.nota2}</td>
+                      <td className="text-center p-3">{item.nota3}</td>
+                      <td className="text-center p-3 font-semibold">
+                        {item.media.toFixed(1)}
+                      </td>
+                      <td className="text-center p-3">
+                        {item.faltas}
+                      </td>
+                      <td className="text-center p-3">
                         <Badge className={getStatusColor(item.media)}>
-                          {item.media >= 6 ? "Aprovado" : "Recuperação"}
+                          {item.media >= 6
+                            ? "Aprovado"
+                            : "Recuperação"}
                         </Badge>
                       </td>
                     </tr>
@@ -114,32 +204,35 @@ const Aluno = () => {
           </CardContent>
         </Card>
 
+        {/* 🔹 AGENDA */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
               Agenda Escolar
             </CardTitle>
-            <CardDescription>Próximas atividades e avaliações</CardDescription>
+            <CardDescription>
+              Próximas atividades
+            </CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="space-y-4">
-              {agenda.map((item, index) => (
+              {agenda.map(item => (
                 <div
-                  key={index}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow"
+                  key={item.id}
+                  className="p-4 border rounded-lg"
                 >
-                  <div className="bg-primary text-primary-foreground rounded-lg p-3 text-center min-w-[70px]">
-                    <div className="text-xs font-semibold">{item.data.split("/")[0]}</div>
-                    <div className="text-lg font-bold">{item.data.split("/")[1]}</div>
+                  <div className="flex gap-2 mb-2">
+                    <Badge variant="outline">
+                      {item.disciplina}
+                    </Badge>
+                    <Badge>{item.tipo}</Badge>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline">{item.disciplina}</Badge>
-                      <Badge className="bg-secondary text-secondary-foreground">{item.tipo}</Badge>
-                    </div>
-                    <h4 className="font-semibold text-foreground">{item.titulo}</h4>
-                  </div>
+                  <p className="font-semibold">{item.titulo}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.data}
+                  </p>
                 </div>
               ))}
             </div>

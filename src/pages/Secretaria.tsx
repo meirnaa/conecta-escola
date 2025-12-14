@@ -20,7 +20,7 @@ const Secretaria = () => {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const res = await fetch("http://localhost:3333/users");
+        const res = await fetch("https://sage-1zk3.onrender.com/users");
         const data = await res.json();
 
         setUsuarios(data);
@@ -46,7 +46,7 @@ const [error, setError] = useState<string | null>(null);
 
 const handleCadastrarAluno = async (p0: string) => {
   try {
-    const res = await fetch("http://localhost:3333/register", {
+    const res = await fetch("https://sage-1zk3.onrender.com/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -106,7 +106,7 @@ const [profSenha, setProfSenha] = useState("");
 
   const handleCadastrarProfessor = async (p0: string) => {
     try {
-      const res = await fetch("http://localhost:3333/register", {
+      const res = await fetch("https://sage-1zk3.onrender.com/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -172,7 +172,7 @@ const [profSenha, setProfSenha] = useState("");
 const handleSalvarEdicaoAluno = async () => {
   if (!editingAluno) return;
 
-  const res = await fetch(`http://localhost:3333/users/${editingAluno.id}`, {
+  const res = await fetch(`https://sage-1zk3.onrender.com/users/${editingAluno.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(editingAluno),
@@ -195,7 +195,7 @@ const handleSalvarEdicaoAluno = async () => {
 const handleSalvarEdicaoProfessor = async () => {
   if (!editingProfessor) return;
 
-  const res = await fetch(`http://localhost:3333/users/${editingProfessor.id}`, {
+  const res = await fetch(`https://sage-1zk3.onrender.com/users/${editingProfessor.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(editingProfessor),

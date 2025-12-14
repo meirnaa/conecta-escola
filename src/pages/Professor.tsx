@@ -59,7 +59,7 @@ const Professor = () => {
   useEffect(() => {
     const fetchAlunos = async () => {
       try {
-        const res = await fetch("http://localhost:3333/users");
+        const res = await fetch("https://sage-1zk3.onrender.com/users");
         const data: Usuario[] = await res.json();
         setUsers(data);
       } catch (err) {
@@ -77,7 +77,7 @@ const Professor = () => {
   useEffect(() => {
     const fetchAvisos = async () => {
       try {
-        const res = await fetch("http://localhost:3333/avisos");
+        const res = await fetch("https://sage-1zk3.onrender.com/avisos");
         const data: Aviso[] = await res.json();
         setAvisos(data);
       } catch (err) {
@@ -118,7 +118,7 @@ const Professor = () => {
         if (!aluno.notas[disciplinaSelecionada]) aluno.notas[disciplinaSelecionada] = [];
         aluno.notas[disciplinaSelecionada][bimestreSelecionado] = nota;
 
-        await fetch(`http://localhost:3333/users/${aluno.id}`, {
+        await fetch(`https://sage-1zk3.onrender.com/users/${aluno.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(aluno),
@@ -148,7 +148,7 @@ const Professor = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3333/aulas", {
+      const res = await fetch("https://sage-1zk3.onrender.com/aulas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(aula),
@@ -182,7 +182,7 @@ const Professor = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3333/avisos", {
+      const res = await fetch("https://sage-1zk3.onrender.com/avisos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(aviso),

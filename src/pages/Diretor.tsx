@@ -33,7 +33,7 @@ const Diretor = () => {
 
   useEffect(() => {
     const fetchDados = async () => {
-      const res = await fetch("http://localhost:3333/users");
+      const res = await fetch("https://sage-1zk3.onrender.com/users");
       const data: Usuario[] = await res.json();
       setAlunos(data.filter(u => u.role === "aluno"));
       setProfessores(data.filter(u => u.role === "professor"));
