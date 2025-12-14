@@ -56,9 +56,9 @@ const Role = () => {
               <BookOpen className="w-12 h-12" />
             </div>
           </div>
-          <CardTitle className="text-4xl font-bold">SAE</CardTitle>
+          <CardTitle className="text-4xl font-bold">SAGE</CardTitle>
           <CardDescription className="text-lg">
-            Sistema de Administração Escolar
+            Sistema de Gestão Escolar
           </CardDescription>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             Modernizando a gestão escolar com praticidade e segurança

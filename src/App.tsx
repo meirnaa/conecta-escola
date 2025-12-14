@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Role from "./pages/Role";
 import AuthLogin from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
 import Aluno from "./pages/Aluno";
 import Professor from "./pages/Professor";
 import Diretor from "./pages/Diretor";
