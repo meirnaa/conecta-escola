@@ -6,6 +6,7 @@ Este trabalho apresenta o desenvolvimento do SAGE - **Sistema de Gestão Escolar
 
 O SAGE foi projetado para atender diferentes perfis de usuários — **Professor, Aluno, Secretaria e Diretor** — cada um com permissões específicas, garantindo organização, segurança e eficiência no gerenciamento das informações escolares.
 
+Nosso site está hospedado aqui: https://conecta-escola-zeta.vercel.app/
 ---
 
 ## 2. Objetivos
